@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Calculator</title>
+    <meta name="description" content="A calculator">
+    <meta name="author" content="Kevan aka Simplesapien">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/png" href="equal.png">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="calculator-body">
+
+        <div class="display"></div>
+
+        <div class="numbers">
+
+            <button id="one">1</button>
+            <button id="two">2</button>
+            <button id="three">3</button>
+            <button id="four">4</button>
+            <button id="five">5</button>
+            <button id="six">6</button>
+            <button id="seven">7</button>
+            <button id="eight">8</button>
+            <button id="nine">9</button>
+            <button id="zero">0</button>
+            <button id="dot">.</button>
+            <button id="plusminus">+/-</button>
+
+
+        </div>
+
+        <div class="operators">
+
+            <button id="multiply">x</button>
+            <button id="divide">/</button>
+            <button id="subtract">-</button>
+            <button id="add">+</button>
+
+        </div>
+
+        <button id="clear">AC</button>
+
+        <button id="backspace">C</button>
+
+        <button id="equal">=</button>
+
+
+    </div>
+
+    
+<script>
+
+let display = document.querySelector('.display');
+const numbers = document.querySelector('.numbers');
+const numberButtons = numbers.querySelectorAll('button');
+const operators = document.querySelector('.operators');
+const operatorButtons = operators.querySelectorAll('button');
+const clearButton = document.getElementById('clear');
+const equalButton = document.getElementById('equal');
+const backspace = document.getElementById('backspace');
+const plusMinus = document.getElementById('plusminus');
+
+let resultPrinted = false;
+let operatorPressed = false;
+let operator;
+let dotCounter = 0;
+display.textContent = 0;
+
+let firstValue = '';
+let secondValue = '';
+
+function add(a, b){
+    return a + b;
+}
+
+function subtract(a,b){
+    return a - b;
+}
+
+function multiply(a, b){
+    return a * b;
+}
+
+function divide(a, b){
+    return a / b;
+}
+
+function operate(a, b, operator){
+
+    let result;
+    let roundedResult;
+
+    a = Number(a);
+    b = Number(b);
+
+    if (operator === '+'){
+        result = add(a, b);
+    }
+    else if (operator === '-'){
+        result = subtract(a, b)
+    }
+    else if (operator === 'x'){
+        result = multiply(a, b)
+    }
+    else if (operator === '/'){
+            result = divide(a, b)
+    } 
+
+    if (result % 1 != 0){
+        roundedResult = parseFloat(result).toFixed(2);
+
+    } else {
+        roundedResult = result;
+    }
+
+    if (!display.textContent.includes('.')){
+            dotCounter = 0;
+    }
+
+    secondValue = '';
+    firstValue = roundedResult;
+    display.textContent = firstValue;
+    operatorPressed = false;
+    resultPrinted = true;
+    operator = '';
+    
+}
+
+clearButton.addEventListener('click', function(){
+    display.textContent = '0';
+    firstValue = '';
+    secondValue = '';
+    operator = '';
+    dotCounter = 0;
+    resultPrinted = false;
+    operatorPressed = false;
+})
+
+numberButtons.forEach(button => {
+    button.addEventListener('click', function(){
+
+        if (button.textContent == '.' && dotCounter == 1 || button.id == 'plusminus'){} 
+        else {
+            display.textContent += this.textContent;
+        }
+
+        if (button.id == 'plusminus'){
+          display.textContent *= -1;
+          firstValue = display.textContent
+        }
+
+        if (display.textContent.charAt(0) === '0'){
+            display.textContent = this.textContent;
+        }
+
+        /* Clears the display, runs once, then 
+           allows the user to once more input 
+           as many numbers as they want */
+
+        if (display.textContent !== '' && operatorPressed == true && button.id !== 'plusminus'){
+            operatorPressed = false;
+            resultPrinted = false;
+            display.textContent = '';
+            display.textContent += this.textContent; 
+        }
+
+        if (display.textContent.includes('.') && button.textContent == '.'){
+            dotCounter = 1;
+        }
+
+        // Overflow
+        if (display.textContent.length >= 13){
+            display.textContent = 'LIMIT REACHED'
+        }
+
+    })
+})
+
+operatorButtons.forEach(button => {
+    button.addEventListener('click', function(){
+
+        if (!firstValue){
+            
+            firstValue = display.textContent;
+            dotCounter = 0;
+
+        } else if (firstValue && resultPrinted == false){
+
+            secondValue = display.textContent;
+            dotCounter = 0;
+
+        }
+
+        console.log(`
+        first value = ${firstValue}.
+        second value = ${secondValue}.
+        operator = ${operator}`)
+
+        if (firstValue && secondValue && operator){
+
+            if (firstValue == 0 && operator == '/' || secondValue == 0 && operator == '/'){
+            display.textContent = 'NICE TRY'
+            } else {
+            operate(firstValue, secondValue, operator);
+            }
+        }
+
+        operator = this.textContent;
+
+        operatorPressed = true;
+
+        // Overflow
+        if (display.textContent.length >= 13){
+            display.textContent = 'LIMIT REACHED'
+        }
+    })
+})
+
+equalButton.addEventListener('click', function(){
+
+    if (resultPrinted == false){
+      secondValue = display.textContent
+    };
+
+    if (operator && secondValue && firstValue){
+
+        if (firstValue == 0 && operator == '/' || secondValue == 0 && operator == '/'){
+            display.textContent = 'NICE TRY'
+        } else {
+            operate(firstValue, secondValue, operator);
+        }
+    }
+    
+    operatorPressed = true; 
+
+    // Overflow
+    if (display.textContent.length >= 13){
+            display.textContent = 'LIMIT REACHED'
+    }
+});
+
+backspace.addEventListener('click', function backspace(){
+
+    display.textContent = display.textContent.substring(0, display.textContent.length - 1);
+    firstValue = display.textContent;
+
+})
+
+// Keyboard functionality. No operator functionality yet.
+document.addEventListener('keydown', function (e){
+
+    e.preventDefault();
+
+     // Clear (escape button)
+     if (e.keyCode == 27){
+        display.textContent = '0';
+        firstValue = '';
+        secondValue = '';
+        operator = '';
+        dotCounter = 0;
+    }
+
+    // Number inputs
+    if (e.key >= 0 && e.key <= 9){
+
+        if (display.textContent.charAt(0) === '0'){
+            display.textContent = e.key;
+        } else if (display.textContent.charAt(0) === '0' && e.key == 0){
+            return false
+        } else {
+            display.textContent += e.key;  
+        }
+
+        if (firstValue && operatorPressed == true){
+            operatorPressed = false;
+            resultPrinted = false;
+            display.textContent = '';
+            display.textContent += e.key; 
+        }
+    }
+
+    // Operators
+    if (e.key == '+' || e.key == '-' || e.key == '/' || e.key == 'x'){
+
+        if (!firstValue){
+            
+            firstValue = display.textContent;
+            dotCounter = 0;
+
+            if (firstValue % 1 != 0){
+                firstValue = parseFloat(firstValue).toFixed(2);
+            } else {
+                firstValue = parseInt(firstValue);
+            }
+
+        } else if (firstValue && resultPrinted == false){
+
+            secondValue = display.textContent;
+            dotCounter = 0;
+
+            if (secondValue % 1 != 0){
+                secondValue = parseFloat(secondValue).toFixed(2);
+            } else {
+                secondValue = parseInt(secondValue);
+            }
+
+        }
+
+        if (firstValue && secondValue && operator){
+
+            if (firstValue == 0 && operator == '/' || secondValue == 0 && operator == '/'){
+            display.textContent = 'NICE TRY'
+            } else {
+            operate(firstValue, secondValue, operator);
+            }
+        }
+
+        operatorPressed = true;
+
+        operator = e.key;
+    }
+
+    // Enter 
+    if (e.keyCode == 13){
+
+        if (firstValue){
+            secondValue = display.textContent;
+        }
+
+        if (operator && secondValue != firstValue){
+
+            firstValue = Number(firstValue);
+            secondValue = Number(secondValue);
+            operate(firstValue, secondValue, operator);
+
+        }
+        
+        operatorPressed = true; 
+    }
+
+    // Backspace 
+    if (e.keyCode == 8){
+        display.textContent = display.textContent.substring(0, display.textContent.length - 1);
+        firstValue = display.textContent;
+    }
+
+    // Plus/minus
+
+    if (e.id == 'plusminus'){
+          display.textContent *= -1;
+        }
+    
+    // Dot
+    if (e.keyCode == 190 && dotCounter == 0){
+            display.textContent += '.';
+            dotCounter = 1;
+        }
+
+    if (e.keyCode == 190 && dotCounter == 1){}
+
+    // Overflow
+    if (display.textContent.length >= 13){
+            display.textContent = 'LIMIT REACHED'
+    }
+});
+
+</script>
+</body>
+</html>
